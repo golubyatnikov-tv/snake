@@ -1,8 +1,8 @@
-export function createKeyboardManager() {
+export function createInputManager() {
     const keys = {};
 
     window.addEventListener('keydown', e => {
-        keys[e.key] = true;
+        keys[e.code] = true;
     })
 
     return {
@@ -11,9 +11,11 @@ export function createKeyboardManager() {
                 .filter(key=>keys[key])                
         },
 
-        clear() {
+        reset() {
             Object.keys(keys)
-                .forEach(key=>keys[key] = false)
+                .forEach(key=>delete keys[key])
         }
     }
 }
+
+export type InputManager = ReturnType<typeof createInputManager>
