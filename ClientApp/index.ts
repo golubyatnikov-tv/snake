@@ -1,6 +1,7 @@
 import { createDrawer } from "./drawing";
-import { GameState, SnakeObject } from "./gameState";
+import { GameState, SnakeObject, GameObject } from "./gameState";
 import { createKeyboardManager } from "./keyboard";
+import { findObject } from "./utils";
 
 // отрисовка
 // модель игры (игровое состояние)
@@ -15,13 +16,13 @@ const gameState: GameState = {
         type: 'snake',
         direction: [0, 0],
         cells: [
-
             [10, 10],
             [11, 10],
             [11, 11]
         ]
     }]
 }
+
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 canvas.width = 400
@@ -69,15 +70,51 @@ function gameLoop() {
         })
     }
 
-    gameState.objects.forEach(o => {
+    gameState.objects.slice().forEach(o => {
         if (o.type === 'snake' && (
             o.direction[0] != 0 || o.direction[1] != 0
         )) {
             const head = o.cells[0];
-            o.cells.pop()
-            o.cells.unshift([o.direction[0] + head[0], o.direction[1] + head[1]])
+            const nextHead = [o.direction[0] + head[0], o.direction[1] + head[1]] as [number, number];
+
+            if(nextHead[0] < 0 || nextHead[0] >= gameState.fieldSize[0]
+                || nextHead[1] < 0 || nextHead[1] >= gameState.fieldSize[1]){
+                    nextHead[0] = (nextHead[0]+gameState.fieldSize[0])%gameState.fieldSize[0];
+                    nextHead[1] = (nextHead[1]+gameState.fieldSize[1])%gameState.fieldSize[1];
+                }
+
+            const nextHeadObject = findObject(gameState, nextHead);
+            if(nextHeadObject?.type == 'eat'){
+                o.cells.unshift(nextHead)
+                const index = gameState.objects.indexOf(nextHeadObject as any)
+                gameState.objects.splice(index, 1);
+            }
+            else if(nextHeadObject?.type == 'snake') {
+                const index = gameState.objects.indexOf(o);
+                gameState.objects.splice(index, 1);
+            }
+            else
+            {
+                o.cells.pop()
+                o.cells.unshift(nextHead)
+            }
         }
     })
+
+    const existingEat = gameState.objects.find(o => o.type == 'eat')
+    // если еды нет
+    if(!existingEat) {
+        const x = Math.round(Math.random() * gameState.fieldSize[0]);
+        const y = Math.round(Math.random() * gameState.fieldSize[1]);
+
+        gameState.objects.push({
+            id: 'eat',
+            type: 'eat',
+            cells: [[x, y]]
+        })
+    }
+
+    
 
     keyboard.clear()
     // отрисовка

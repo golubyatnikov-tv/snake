@@ -11,9 +11,11 @@ export type GameObject = {
 
 export type SnakeObject = GameObject & {
     type: 'snake';
-    direction: [number, number];
+    direction: Cell;
 }
 
 export type EatObject = GameObject & {
     type: 'eat'
 }
+
+export type Cell = [number, number];

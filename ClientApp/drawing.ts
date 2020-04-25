@@ -29,7 +29,7 @@ export function createDrawer(context: CanvasRenderingContext2D, fieldSize: [numb
     function drawCells(cells: [number, number][]) {
         cells.forEach(c=>{
             const xi = c[0];
-            const yi = c[1];
+            const yi = c[1];            
 
             context.fillRect(xi*cellWidth, yi*cellHeight, cellWidth, cellHeight);
         })
@@ -42,7 +42,16 @@ export function createDrawer(context: CanvasRenderingContext2D, fieldSize: [numb
             drawField();
 
             objects.forEach(o=>{
+                context.save();
+                if(o.type == 'eat')
+                {
+                    const r = Math.random() * 255;
+                    const g = Math.random() * 255;
+                    const b = Math.random() * 255;
+                    context.fillStyle = `rgb(${r},${g},${b})`;
+                }
                 drawCells(o.cells)
+                context.restore();
             })            
         }
     }
